@@ -18,6 +18,7 @@
 declare const EdgeKV: any
 import app, { setSpaFallbackHtml } from "./src/backend/index"
 import INDEX_HTML from "./dist/index.html"
+import { isEsaPageNavigation } from "./src/backend/pkg/esa-navigation"
 // 构建期内联 dist/index.html 作为 SPA 兜底壳
 setSpaFallbackHtml(INDEX_HTML)
 // 模块级：探测 EdgeKV 全局构造器（ESA 运行时可能挂在不同的全局对象上）
@@ -179,6 +180,16 @@ function wrapEsaEdgeKV(
 }
 export default {
   async fetch(request: Request, context: any, env: any) {
+    // ESA's global SPA fallback also intercepts /api/d downloads.
+    // Handle page navigation here so API/download requests still run the app.
+    if (isEsaPageNavigation(request)) {
+      return new Response(request.method === "HEAD" ? null : INDEX_HTML, {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+      })
+    }
     // ESA: (request, context, env)
     // Hono: (request, env, executionCtx)
     const url = new URL(request.url)
