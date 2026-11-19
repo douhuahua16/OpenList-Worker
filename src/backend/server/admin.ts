@@ -3480,6 +3480,12 @@ const driverConfigs: Record<string, any> = {
         required: false,
       },
       {
+        name: "user_domain_id",
+        type: "string",
+        default: "",
+        required: false,
+      },
+      {
         name: "order_by",
         type: "select",
         options: "name,size,modified",
